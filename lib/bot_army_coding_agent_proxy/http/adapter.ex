@@ -56,8 +56,7 @@ defmodule BotArmyCodingAgentProxy.HTTP.Adapter do
   defp build_system_line(system) when is_list(system) do
     text =
       system
-      |> Enum.map(&extract_text_content/1)
-      |> Enum.join("\n")
+      |> Enum.map_join("\n", &extract_text_content/1)
       |> String.trim()
 
     if text == "", do: "", else: "System: #{text}"
@@ -67,12 +66,11 @@ defmodule BotArmyCodingAgentProxy.HTTP.Adapter do
 
   defp build_messages_block(messages) when is_list(messages) do
     messages
-    |> Enum.map(fn msg ->
+    |> Enum.map_join("\n", fn msg ->
       role = msg |> Map.get("role", "user") |> to_string() |> String.trim()
       content = msg |> Map.get("content") |> extract_text_content()
       "[#{role}] #{content}"
     end)
-    |> Enum.join("\n")
     |> String.trim()
   end
 
@@ -82,7 +80,7 @@ defmodule BotArmyCodingAgentProxy.HTTP.Adapter do
 
   defp extract_text_content(content) when is_list(content) do
     content
-    |> Enum.map(fn part ->
+    |> Enum.map_join("\n", fn part ->
       cond do
         is_binary(part) ->
           part
@@ -94,7 +92,6 @@ defmodule BotArmyCodingAgentProxy.HTTP.Adapter do
           ""
       end
     end)
-    |> Enum.join("\n")
     |> String.trim()
   end
 
