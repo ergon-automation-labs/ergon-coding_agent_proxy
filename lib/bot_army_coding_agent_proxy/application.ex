@@ -8,10 +8,10 @@ defmodule BotArmyCodingAgentProxy.Application do
   @impl true
   def start(_type, _args) do
     children =
-      if Mix.env() == :test do
-        []
-      else
+      if Application.get_env(:bot_army_coding_agent_proxy, :start_consumer, true) do
         [{BotArmyCodingAgentProxy.NATS.Consumer, []}]
+      else
+        []
       end
 
     opts = [strategy: :one_for_one, name: BotArmyCodingAgentProxy.Supervisor]
