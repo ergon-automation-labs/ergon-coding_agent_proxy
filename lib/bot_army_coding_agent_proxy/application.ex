@@ -1,4 +1,8 @@
 defmodule BotArmyCodingAgentProxy.Application do
+  @moduledoc """
+  OTP application entrypoint for Coding Agent Proxy bot.
+  """
+
   use Application
 
   @impl true

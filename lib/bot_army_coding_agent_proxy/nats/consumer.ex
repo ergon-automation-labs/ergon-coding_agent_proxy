@@ -1,4 +1,9 @@
 defmodule BotArmyCodingAgentProxy.NATS.Consumer do
+  @moduledoc """
+  Request/reply NATS consumer that forwards coding-agent chat payloads to
+  Bot Army LLM lane subjects.
+  """
+
   use GenServer
   require Logger
 
