@@ -104,26 +104,23 @@ publish-release: release
 	@echo "==============================================="
 	@echo ""
 
-	# Get version from Mix project config
+	@set -e; \
 	VERSION=$$(sed -n 's/^[[:space:]]*version:[[:space:]]*"\([^"]*\)".*/\1/p' mix.exs | head -n 1); \
 	if [ -z "$$VERSION" ]; then \
 		echo "Failed to resolve version from mix.exs"; \
 		exit 1; \
 	fi; \
+	TARBALL="coding_agent_proxy_bot-$$VERSION.tar.gz"; \
 	echo "Version: $$VERSION"; \
-	\
-	# Create tarball
 	echo "Creating release tarball..."; \
-	tar -czf coding_agent_proxy_bot-$$VERSION.tar.gz -C _build/prod/rel coding_agent_proxy_bot/; \
-	echo "✓ Tarball created: coding_agent_proxy_bot-$$VERSION.tar.gz"; \
+	tar -czf "$$TARBALL" -C _build/prod/rel coding_agent_proxy_bot/; \
+	echo "✓ Tarball created: $$TARBALL"; \
 	echo ""; \
-	\
-	# Create or update GitHub release
 	echo "Creating GitHub release v$$VERSION..."; \
-	if gh release view v$$VERSION >/dev/null 2>&1; then \
-		gh release upload v$$VERSION coding_agent_proxy_bot-$$VERSION.tar.gz --clobber; \
+	if gh release view "v$$VERSION" >/dev/null 2>&1; then \
+		gh release upload "v$$VERSION" "$$TARBALL" --clobber; \
 	else \
-		gh release create v$$VERSION coding_agent_proxy_bot-$$VERSION.tar.gz \
+		gh release create "v$$VERSION" "$$TARBALL" \
 			--title "Release v$$VERSION" \
 			--notes "Coding Agent Proxy Bot Elixir release v$$VERSION. Download and deploy with Jenkins." \
 			--draft=false; \
@@ -133,8 +130,7 @@ publish-release: release
 	echo "Next steps:"; \
 	echo "1. Jenkins will automatically detect the new release"; \
 	echo "2. Trigger deployment in Jenkins UI or wait for auto-deployment"; \
-	echo "3. Check deployment status: make jenkins-logs"; \
-	echo ""
+	echo "3. Check deployment status: make jenkins-logs"
 
 push-and-publish:
 	@git push && $(MAKE) publish-release
