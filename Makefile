@@ -104,8 +104,12 @@ publish-release: release
 	@echo "==============================================="
 	@echo ""
 
-	# Get version from release metadata
-	VERSION=$$(cat _build/prod/rel/coding_agent_proxy_bot/releases/RELEASES | tail -1 | cut -d' ' -f2); \
+	# Get version from Mix project config
+	VERSION=$$(sed -n 's/^[[:space:]]*version:[[:space:]]*"\([^"]*\)".*/\1/p' mix.exs | head -n 1); \
+	if [ -z "$$VERSION" ]; then \
+		echo "Failed to resolve version from mix.exs"; \
+		exit 1; \
+	fi; \
 	echo "Version: $$VERSION"; \
 	\
 	# Create tarball
@@ -114,12 +118,16 @@ publish-release: release
 	echo "✓ Tarball created: coding_agent_proxy_bot-$$VERSION.tar.gz"; \
 	echo ""; \
 	\
-	# Create GitHub release
+	# Create or update GitHub release
 	echo "Creating GitHub release v$$VERSION..."; \
-	gh release create v$$VERSION coding_agent_proxy_bot-$$VERSION.tar.gz \
-		--title "Release v$$VERSION" \
-		--notes "Coding Agent Proxy Bot Elixir release v$$VERSION. Download and deploy with Jenkins." \
-		--draft=false; \
+	if gh release view v$$VERSION >/dev/null 2>&1; then \
+		gh release upload v$$VERSION coding_agent_proxy_bot-$$VERSION.tar.gz --clobber; \
+	else \
+		gh release create v$$VERSION coding_agent_proxy_bot-$$VERSION.tar.gz \
+			--title "Release v$$VERSION" \
+			--notes "Coding Agent Proxy Bot Elixir release v$$VERSION. Download and deploy with Jenkins." \
+			--draft=false; \
+	fi; \
 	echo "✓ Release published to GitHub"; \
 	echo ""; \
 	echo "Next steps:"; \
